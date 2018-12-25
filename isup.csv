@@ -1,0 +1,68 @@
+Layer,Field,Description,FS field,MySql type,IS NULL,convert_from,convert_to,Index, SF mode(Search&Display; Search; Display; None)
+Time,Start date,Detailed Record open time,first(frame.time_epoch),BIGINT UNSIGNED,NOT NULL,bigint2secnsec,secnsec2bigint,yes,Search&Display
+Time,End date,Detailed Record close time,last(frame.time_epoch),BIGINT UNSIGNED,NOT NULL,bigint2secnsec,secnsec2bigint,no,Search&Display
+IP,IP Src,Source IP address,first(ip.src),INT UNSIGNED,NOT NULL,int2ipv4,ipv42int,,Search&Display
+IP,IP Dst,Destination IP address,first(ip.dst),INT UNSIGNED,NOT NULL,int2ipv4,ipv42int,,Search&Display
+TCP/SCTP/UDP,Port src,Source port,first(any(tcp.srcport;udp.srcport;sctp.srcport)),SMALLINT UNSIGNED,NOT NULL,,,,Search&Display
+TCP/SCTP/UDP,Port dst,Destination port,any(first(tcp.dstport);first(udp.dstport);first( sctp.dstport)),SMALLINT UNSIGNED,NOT NULL,,,,Search&Display
+Common,LinkID,Link ID,$linkid,SMALLINT UNSIGNED,NOT NULL,smlint2link,,,Search&Display
+Common,ProbeID,Probe ID,$probeid,TINYINT UNSIGNED,NOT NULL,smlint2node,,,Search&Display
+Common,LocationID,Location ID,$locaionid,TINYINT UNSIGNED,NOT NULL,smlint2location,,,Search&Display
+Common,Record status,XDR status,nop(enrich.db),TINYINT UNSIGNED,NOT NULL,common_record_status,,No,Search&Display
+Common,Backward units,Nb of received MSU,sum(if(way(pdu.toward);0;1)),TINYINT UNSIGNED,NOT NULL,,,,Search&Display
+Common,Towards units,Nb of transmitted MSU,sum(if(way(pdu.toward);1;0)),TINYINT UNSIGNED,NOT NULL,,,,Search&Display
+Common,Backward units size,Received bytes,sum(if(way(pdu.toward);0;frame.len)),SMALLINT UNSIGNED,NOT NULL,,,,Search&Display
+Common,Towards units size,Transmitted bytes,sum(if(way(pdu.toward);frame.len;0)),SMALLINT UNSIGNED,NOT NULL,,,,Search&Display
+Common,Message type,Message type,first(isup.message_type),SMALLINT UNSIGNED,NOT NULL,common_message_type,,Yes,Search&Display
+Common,Protocol type,Protocol,protocol(*),TINYINT UNSIGNED,NOT NULL,common_protocol_type,,No,Search&Display
+Common,NE src,Related Object ID from Source Network Element,$ne_src,INT UNSIGNED,DEFAULT NULL,get_neelement_by_id,,Yes,Search&Display
+Common,NE dst,Related Object ID from Destination Network Element,$ne_dst,INT UNSIGNED,DEFAULT NULL,get_neelement_by_id,,Yes,Search&Display
+MTP3,OPC,Originating Point Code,first (m3ua.protocol_data_opc or mtp3.opc),INT UNSIGNED,DEFAULT NULL,enrich_mtp3pc,,Yes,Search&Display
+MTP3,DPC,Destination Point Code,lor(first (m3ua.protocol_data_dpc);first( mtp3.dpc)),INT UNSIGNED,DEFAULT NULL,enrich_mtp3pc,,Yes,Search&Display
+MTP3,MTP3 NI,Network Indicator,lor(first (m3ua.protocol_data_ni);first( mtp3.network_indicator)),TINYINT UNSIGNED,DEFAULT NULL,network_indicator,,,Search&Display
+ISUP_BICC,CIC,Circit Identification Code,lor(first( isup.cic);first( bicc.cic)),INT UNSIGNED,DEFAULT NULL,,,Yes,Search&Display
+Common,Calling number,Calling number,lor(first(isup.calling); first(e164.calling_party_number.digits)),VARBINARY(255),DEFAULT NULL,,nb2bin,Yes,Search&Display
+Common,Calling number NOA,Calling nature of address,first(if(message(*)== 1;isup.calling_party_nature_of_address_indicator;*)),TINYINT UNSIGNED,DEFAULT NULL,nature_of_address,,,Search&Display
+Common,Called number,Called number,lor(first(isup.callied); first(e164.called_party_number.digits)),VARBINARY(255),DEFAULT NULL,,nb2bin,Yes,Search&Display
+Common,Called number NOA,Called nature of address,first(if( message(*)==1 ;isup.called_party_nature_of_address_indicator;*)),TINYINT UNSIGNED,DEFAULT NULL,nature_of_address,,,Search&Display
+ISUP_BICC,REL Cause value,REL Cause value,if(message(*)==12 ;isup.cause_indicator;*),TINYINT UNSIGNED,DEFAULT NULL,voice_call_cause_indicator,,,Search&Display
+ISUP_BICC,REL Cause location,REL Cause location,if(message(*)==12 ;q931.cause_location;*),TINYINT UNSIGNED,DEFAULT NULL,q931_cause_location,,,Search&Display
+ISUP_BICC,ACM Cause value,ACM Cause value,if(message(*)==6 ;isup.cause_indicator;*),TINYINT UNSIGNED,DEFAULT NULL,voice_call_cause_indicator,,,Search&Display
+ISUP_BICC,ACM Cause location,ACM Cause location,if(message(*)==6 ;q931.cause_location;*),TINYINT UNSIGNED,DEFAULT NULL,q931_cause_location,,,Search&Display
+Common,Location number,Location Number,isup.location_number,VARBINARY(8),DEFAULT NULL,,nb2bin,,Search&Display
+ISUP_BICC,Redirecting number,Redirecting number,first(if(message(*)==1 ;isup.redirecting;*)),VARBINARY(8),DEFAULT NULL,,nb2bin,,Search&Display
+ISUP_BICC,Redirecting number NOA,Redirecting nature of address,isup.redirecting_party_nature_of_address_indicator,TINYINT UNSIGNED,DEFAULT NULL,nature_of_address,,,Search&Display
+ISUP_BICC,Original Called number,Original Called number,isup.original_called_number,VARBINARY(8),DEFAULT NULL,,nb2bin,,Search&Display
+ISUP_BICC,Original Called number NOA,Original Called nature of address,isup.original_called_party_nature_of_address_indicator,TINYINT UNSIGNED,DEFAULT NULL,nature_of_address,,,Search&Display
+ISUP_BICC,Connected number,Connected Number,isup.connected_number,VARBINARY(8),DEFAULT NULL,,nb2bin,,Search&Display
+ISUP_BICC,Connected number NOA,Connected nature of address,isup.connected_party_nature_of_address_indicator,TINYINT UNSIGNED,DEFAULT NULL,nature_of_address,,,Search&Display
+ISUP_BICC,Charge indicator,Charge indicator,isup.charge_indicator,SMALLINT UNSIGNED,DEFAULT NULL,charge_indicator,,,Search&Display
+MTP3,Releasing OPC,Releasing OPC,first(if (isup.parameter_type ==18;any(m3ua.protocol_data_opc; mtp3.opc);*)),INT UNSIGNED,DEFAULT NULL,enrich_mtp3pc,,,Search&Display
+ISUP_BICC,Redirection indicator,Redirection indicator,isup.redirecting_ind,SMALLINT UNSIGNED,DEFAULT NULL,redirecting_indicator,,,Search&Display
+ISUP_BICC,Redirection reason,Redirection reason,isup.redirection_reason,SMALLINT UNSIGNED,DEFAULT NULL,redirection_reason,,,Search&Display
+Time,Dialing time,Time between Initial Address Message (IAM) and the last Subsequent Address Message (SAM). If there is no SAM messages in the call; the time is zero.,ifnull(tsdiff(last(if(message(*)==2;frame.time_epoch;*));first(if(message(*)==1;frame.time_epoch;*)));0),MEDIUMINT UNSIGNED,DEFAULT NULL,bigint2secmsec,secmsec2bigint,,Search&Display
+Time,Setup time,Time between Initial Address Message (IAM) or the last Subsequent Address Message (SAM) and an ACM; ANM or REL or RLC if the call fails.,n/a,MEDIUMINT UNSIGNED,DEFAULT NULL,bigint2secmsec,secmsec2bigint,,Search&Display
+Time,Ring time,Time between ACM and ANM and any call release message. If the ACM message does not appear in the call; the time is zero.,ifnull(tsdiff(first(if(message(*)==9 or message(*)==12 or message(*)==16;frame.time_epoch;*));last(if(message(*)==6;frame.time_epoch;*)));0),MEDIUMINT UNSIGNED,DEFAULT NULL,bigint2secmsec,secmsec2bigint,,Search&Display
+Time,Delay time,Time between first CPG and ANM. If CPG is missing; this time is zero.,ifnull(tsdiff(last(if(message(*)==9;frame.time_epoch;*));first(if(message(*)==44;frame.time_epoch;*)));0),MEDIUMINT UNSIGNED,DEFAULT NULL,bigint2secmsec,secmsec2bigint,,Search&Display
+Time,Conversation time,Time between ANM message and the last SUS message (or REL if no SUS received) or Time between ANM message and REL message (or RLC if REL is not received). If ANM is missing; the time is zero.,ifnull(tsdiff(first(if(message(*)==12 or message(*)==13 or message(*)==16;frame.time_epoch;*));last(if(message(*)==9;frame.time_epoch;*)));0),MEDIUMINT UNSIGNED,DEFAULT NULL,bigint2secmsec,secmsec2bigint,,Search&Display
+Time,Release time,Time between REL and RLC. If REL is missing; this time is zero.,ifnull(tsdiff(last(if(message(*)==16;frame.time_epoch;*));first(if(message(*)==12;frame.time_epoch;*)));0),MEDIUMINT UNSIGNED,DEFAULT NULL,bigint2secmsec,secmsec2bigint,,Search&Display
+Time,Holding time,Time from IAM to RLC,ifnull(tsdiff(last(if(message(*)==16;frame.time_epoch;*));first(if(message(*)==1;frame.time_epoch;*)));0),MEDIUMINT UNSIGNED,DEFAULT NULL,bigint2secmsec,secmsec2bigint,,Search&Display
+ISUP_BICC,Outgoing Echo,Outgoing Echo,isup.echo_control_device_indicator,BOOL,DEFAULT NULL,voice_call_echo_indicator,,,Search&Display
+ISUP_BICC,Incoming Echo,Incoming Echo,isup.backw_call_echo_control_device_indicator,BOOL,DEFAULT NULL,voice_call_echo_indicator,,,Search&Display
+SDP,Media Src address,Media Source address,first(if (sdp.ipbcp.command == 'Request' and sdp.connection_info.address_type == 'IP4';sdp.connection_info.address;*)),INT UNSIGNED,DEFAULT NULL,int2ipv4,ipv42int,,Search&Display
+SDP,Media Src address IPv6,Media Source address IPv6,first(if (sdp.ipbcp.command == 'Request' and sdp.connection_info.address_type == 'IP6';sdp.connection_info.address;*)),VARBINARY(16),DEFAULT NULL,,,,Search&Display
+SDP,Media Src port,Media Source port,first(if (sdp.ipbcp.command == 'Request';sdp.media.port;*)),SMALLINT UNSIGNED,DEFAULT NULL,,,,Search&Display
+SDP,Media Dst address,Media destination address,first(if (sdp.ipbcp.command == 'Accepted' and sdp.connection_info.address_type == 'IP4';sdp.connection_info.address;*)),INT UNSIGNED,DEFAULT NULL,int2ipv4,ipv42int,,Search&Display
+SDP,Media Dst address IPv6,Media destination address IPv6,first(if (sdp.ipbcp.command == 'Accepted' and sdp.connection_info.address_type == 'IP6';sdp.connection_info.address;*)),VARBINARY(16),DEFAULT NULL,,,,Search&Display
+SDP,Media dst port,Media destination port,first(if (sdp.ipbcp.command == 'Accepted';sdp.media.port;*)),SMALLINT UNSIGNED,DEFAULT NULL,,,,Search&Display
+SDP,Media Src type,Media Source type,first(if( sdp.ipbcp.command == 'Request' ;sdp.media.media;*)),VARCHAR(255),DEFAULT NULL,,,,Search&Display
+SDP,Media Dst type,Media Destination type,first(if( sdp.ipbcp.command == 'Accepted' ;sdp.media.media;*)),VARCHAR(255),DEFAULT NULL,,,,Search&Display
+SDP,Media Src proto,Media Source proto,first(if( sdp.ipbcp.command == 'Request' ;sdp.media.proto;*)),VARCHAR(255),DEFAULT NULL,,,,Search&Display
+SDP,Media Dst proto,Media Destination proto,first(if( sdp.ipbcp.command == 'Accepted' ;sdp.media.proto;*)),VARCHAR(255),DEFAULT NULL,,,,Search&Display
+ISUP_BICC,Orig Cause Value,First appeared Cause Value,n/a,TINYINT UNSIGNED,DEFAULT NULL,voice_call_cause_indicator,,,Search&Display
+ISUP_BICC,Cause location,First appeared Cause Location,n/a,TINYINT UNSIGNED,DEFAULT NULL,q931_cause_location,,,Search&Display
+Common,Answered,Was the call answered or no (Yes or No),n/a,BOOL,DEFAULT NULL,voice_is_answered,,,Search&Display
+ISUP_BICC,Cause family,Cause Family for first appeared Cause Value/Location,n/a,TINYINT UNSIGNED,DEFAULT NULL,voice_cause_family,,,Search&Display
+ISUP_BICC,Way,Call direction: incoming or outgoing,n/a,BOOL,DEFAULT NULL,direction,,,Search&Display
+Debug,xpi inst id,XPI insance id,$xpi_instance_id,TINYINT UNSIGNED,NOT NULL,,,,Search&Display
+Common,XDR Messages,List of messages of XDR,$xdr_messages,VARCHAR(255),NOT NULL,,,,Search
